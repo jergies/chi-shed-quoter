@@ -45,6 +45,16 @@
         <label>Number of Windows</label>
         <input type="number" id="windows" value="4" min="0" max="12" onchange="calculate()">
 
+        <label>Slab Thickness (inches)</label>
+        <select id="slabThick" onchange="calculate()">
+            <option value="4">4"</option>
+            <option value="6" selected>6" Recommended</option>
+            <option value="8">8" Heavy</option>
+        </select>
+
+        <label>Footer Depth (inches) — separate pour</label>
+        <input type="number" id="footerDepth" value="24" onchange="calculate()">
+
         <button onclick="calculate()" style="margin:25px 0; padding:18px;">Get Full Quote</button>
         
         <div class="quote" id="quoteDisplay">Adjust options and tap Get Full Quote</div>
@@ -60,6 +70,8 @@
             const ohDoors = parseInt(document.getElementById('ohDoors').value) || 0;
             const walkDoors = parseInt(document.getElementById('walkDoors').value) || 0;
             const windows = parseInt(document.getElementById('windows').value) || 0;
+            const slabThick = parseFloat(document.getElementById('slabThick').value);
+            const footerDepth = parseFloat(document.getElementById('footerDepth').value) || 24;
 
             const sqft = Math.round(w * l);
             let basePrice = Math.round(sqft * 32);
@@ -70,20 +82,30 @@
 
             let total = basePrice;
 
-            const ohCost = ohDoors * 2800;
-            const walkCost = walkDoors * 850;
-            const winCost = windows * 450;
-            total += ohCost + walkCost + winCost;
+            // Doors
+            total += ohDoors * 2800;
+            total += walkDoors * 850;
+            total += windows * 450;
 
-            let summary = `<strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} • ${pitch}:12 Pitch</strong><br><br>`;
+            // Concrete - Two pours
+            const slabArea = (w + 4) * (l + 4);
+            const slabCost = Math.round(slabArea * (slabThick / 12) * 7.5);
+
+            const footerPerimeter = 2 * (w + l);
+            const footerCost = Math.round(footerPerimeter * 1.5 * (footerDepth / 12) * 8.5);
+
+            total += slabCost + footerCost;
+
+            let summary = `<strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} • ${pitch}:12</strong><br><br>`;
             summary += `Floor Area: ${sqft} sq ft<br>`;
-            summary += `Base Building: $${basePrice.toLocaleString()}<br><br>`;
-
-            if (ohDoors > 0) summary += `Overhead Doors (${ohDoors}): $${ohCost.toLocaleString()}<br>`;
-            if (walkDoors > 0) summary += `Walk Doors (${walkDoors}): $${walkCost.toLocaleString()}<br>`;
-            if (windows > 0) summary += `Windows (${windows}): $${winCost.toLocaleString()}<br>`;
-
-            summary += `<hr><strong style="color:#0066cc; font-size:1.4em;">Grand Total Estimate: $${total.toLocaleString()}</strong>`;
+            summary += `Base Building: $${basePrice.toLocaleString()}<br>`;
+            if (ohDoors) summary += `Overhead Doors (${ohDoors}): $${(ohDoors*2800).toLocaleString()}<br>`;
+            if (walkDoors) summary += `Walk Doors (${walkDoors}): $${(walkDoors*850).toLocaleString()}<br>`;
+            if (windows) summary += `Windows (${windows}): $${(windows*450).toLocaleString()}<br>`;
+            summary += `<br><strong>Concrete (Two Pours):</strong><br>`;
+            summary += `• Slab (${slabThick}"): $${slabCost.toLocaleString()}<br>`;
+            summary += `• Footers (${footerDepth}" deep): $${footerCost.toLocaleString()}<br>`;
+            summary += `<hr><strong style="color:#0066cc; font-size:1.4em;">Grand Total: $${total.toLocaleString()}</strong>`;
 
             document.getElementById('quoteDisplay').innerHTML = summary;
         }
