@@ -62,11 +62,9 @@
             const sqft = Math.round(w * l);
             let basePrice = Math.round(sqft * 32);
 
-            // Roof type multiplier
             if (roofType === 'asym') basePrice = Math.round(basePrice * 1.18);
             if (roofType === 'single') basePrice = Math.round(basePrice * 0.95);
 
-            // Slight pitch adjustment (higher pitch = slightly more material)
             const pitchFactor = 1 + (pitch / 24);
             basePrice = Math.round(basePrice * pitchFactor);
 
@@ -75,12 +73,10 @@
                 Pitch: ${pitch}:12<br><br>
                 Floor Area: ${sqft} sq ft<br>
                 <strong>Estimated Total: $${basePrice.toLocaleString()}</strong><br><br>
-                <small>This is a ballpark figure including basic roof framing.<br>
-                Doors, insulation, concrete, etc. can be added for a more precise quote.</small>
+                <small>Ballpark estimate. Doors, insulation, concrete available on request.</small>
             `;
         }
 
-        // Auto-calculate on load
         window.onload = calculate;
     </script>
 </body>
