@@ -11,6 +11,7 @@
         label { display:block; margin:12px 0 6px; font-weight:bold; }
         input, select, button { width:100%; padding:14px; margin:8px 0; border:1px solid #ccc; border-radius:8px; font-size:1.05em; }
         button { background:#0066cc; color:white; border:none; font-weight:bold; }
+        .add-btn { background:#28a745; }
         .quote { background:#e6f7e6; padding:20px; border-radius:10px; margin-top:20px; line-height:1.6; }
     </style>
 </head>
@@ -23,7 +24,7 @@
 
         <label>Roof System</label>
         <select id="roofType" onchange="calculate()">
-            <option value="gable">Gabled (Standard)</option>
+            <option value="gable">Gabled</option>
             <option value="single">Single Slope</option>
             <option value="asym">Asymmetrical</option>
         </select>
@@ -36,21 +37,14 @@
             <option value="5">5:12</option><option value="5.5">5.5:12</option><option value="6">6:12</option>
         </select>
 
-        <label>Slab Thickness (inches)</label>
-        <select id="slabThick" onchange="calculate()">
-            <option value="4">4"</option>
-            <option value="6" selected>6" Recommended</option>
-            <option value="8">8" Heavy</option>
-        </select>
+        <label>Number of Overhead Doors</label>
+        <input type="number" id="ohDoors" value="2" min="0" max="4" onchange="calculate()">
 
-        <label>Footer Depth (inches) — separate pour</label>
-        <input type="number" id="footerDepth" value="24" onchange="calculate()">
+        <label>Number of Walk Doors</label>
+        <input type="number" id="walkDoors" value="1" min="0" max="6" onchange="calculate()">
 
-        <label>Walkway Width (ft) — 0 = none</label>
-        <input type="number" id="walkway" value="4" min="0" onchange="calculate()">
-
-        <label>Approach Length (ft) — 0 = none</label>
-        <input type="number" id="approach" value="20" min="0" onchange="calculate()">
+        <label>Number of Windows</label>
+        <input type="number" id="windows" value="4" min="0" max="12" onchange="calculate()">
 
         <button onclick="calculate()" style="margin:25px 0; padding:18px;">Get Full Quote</button>
         
@@ -64,10 +58,9 @@
             const h = parseFloat(document.getElementById('height').value) || 14;
             const roofType = document.getElementById('roofType').value;
             const pitch = parseFloat(document.getElementById('pitch').value);
-            const slabThick = parseFloat(document.getElementById('slabThick').value);
-            const footerDepth = parseFloat(document.getElementById('footerDepth').value) || 24;
-            const walkwayW = parseFloat(document.getElementById('walkway').value) || 0;
-            const approachL = parseFloat(document.getElementById('approach').value) || 0;
+            const ohDoors = parseInt(document.getElementById('ohDoors').value) || 0;
+            const walkDoors = parseInt(document.getElementById('walkDoors').value) || 0;
+            const windows = parseInt(document.getElementById('windows').value) || 0;
 
             const sqft = Math.round(w * l);
             let basePrice = Math.round(sqft * 32);
@@ -76,39 +69,24 @@
             if (roofType === 'single') basePrice = Math.round(basePrice * 0.95);
             basePrice = Math.round(basePrice * (1 + pitch / 24));
 
-            // Concrete - Two pours
-            const slabArea = (w + 4) * (l + 4);
-            const slabCost = Math.round(slabArea * (slabThick / 12) * 7.5);
+            let total = basePrice;
 
-            const footerPerimeter = 2 * (w + l);
-            const footerCost = Math.round(footerPerimeter * 1.5 * (footerDepth / 12) * 8.5);
-
-            let total = basePrice + slabCost + footerCost;
-
-            // Walkway
-            if (walkwayW > 0) {
-                const walkwayCost = Math.round(2*(w+l) * walkwayW * 6);
-                total += walkwayCost;
-            }
-
-            // Approach
-            if (approachL > 0) {
-                const approachCost = Math.round(approachL * 12 * 6.5);
-                total += approachCost;
-            }
+            // Doors
+            const ohCost = ohDoors * 2800;
+            const walkCost = walkDoors * 850;
+            const winCost = windows * 450;
+            total += ohCost + walkCost + winCost;
 
             document.getElementById('quoteDisplay').innerHTML = `
-                <strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} • ${pitch}:12 Pitch</strong><br><br>
+                <strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} • ${pitch}:12</strong><br><br>
                 Floor Area: ${sqft} sq ft<br>
                 Base Building: $${basePrice.toLocaleString()}<br><br>
-                <strong>Concrete (Two Separate Pours):</strong><br>
-                • Slab (${slabThick}"): $${slabCost.toLocaleString()}<br>
-                • Footers (${footerDepth}" deep): $${footerCost.toLocaleString()}<br>
-                ${walkwayW > 0 ? `• Walkway (${walkwayW}' wide): $${Math.round(2*(w+l)*walkwayW*6).toLocaleString()}<br>` : ''}
-                ${approachL > 0 ? `• Approach (${approachL}' long): $${Math.round(approachL*12*6.5).toLocaleString()}<br>` : ''}
+                ${ohDoors ? `Overhead Doors (${ohDoors}): $${ohCost.toLocaleString()}<br>` : ''}
+                ${walkDoors ? `Walk Doors (${walkDoors}): $${walkCost.toLocaleString()}<br>` : ''}
+                ${windows ? `Windows (${windows}): $${winCost.toLocaleString()}<br>` : ''}
                 <hr>
-                <strong style="color:#0066cc; font-size:1.4em;">Grand Total Estimate: $${total.toLocaleString()}</strong><br><br>
-                <small>Realistic 2026 ballpark • Doors, insulation, windows available on request.</small>
+                <strong style="color:#0066cc; font-size:1.4em;">Estimated Total: $${total.toLocaleString()}</strong><br><br>
+                <small>Ballpark 2026 pricing • Concrete, insulation, etc. available on request.</small>
             `;
         }
 
