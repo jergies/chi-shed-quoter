@@ -24,31 +24,31 @@
         <label>Roof System</label>
         <select id="roofType" onchange="calculate()">
             <option value="gable">Gabled (Standard)</option>
-            <option value="single">Single Slope / Lean-To</option>
+            <option value="single">Single Slope</option>
             <option value="asym">Asymmetrical</option>
         </select>
 
         <label>Roof Pitch (rise in 12)</label>
         <select id="pitch" onchange="calculate()">
-            <option value="0.5">0.5:12</option>
-            <option value="1">1:12</option>
-            <option value="1.5">1.5:12</option>
-            <option value="2">2:12</option>
-            <option value="2.5">2.5:12</option>
-            <option value="3" selected>3:12</option>
-            <option value="3.5">3.5:12</option>
-            <option value="4">4:12</option>
-            <option value="4.5">4.5:12</option>
-            <option value="5">5:12</option>
-            <option value="5.5">5.5:12</option>
-            <option value="6">6:12</option>
+            <option value="0.5">0.5:12</option><option value="1">1:12</option><option value="1.5">1.5:12</option>
+            <option value="2">2:12</option><option value="2.5">2.5:12</option><option value="3" selected>3:12</option>
+            <option value="3.5">3.5:12</option><option value="4">4:12</option><option value="4.5">4.5:12</option>
+            <option value="5">5:12</option><option value="5.5">5.5:12</option><option value="6">6:12</option>
         </select>
+
+        <label>Slab Thickness (inches)</label>
+        <select id="slabThick" onchange="calculate()">
+            <option value="4">4"</option>
+            <option value="6" selected>6" (Recommended)</option>
+            <option value="8">8" Heavy</option>
+        </select>
+
+        <label>Footer Depth (inches) — separate pour</label>
+        <input type="number" id="footerDepth" value="24" onchange="calculate()">
 
         <button onclick="calculate()" style="margin:25px 0; padding:18px;">Get Full Quote</button>
         
-        <div class="quote" id="quoteDisplay">
-            Adjust options and tap Get Full Quote
-        </div>
+        <div class="quote" id="quoteDisplay">Adjust options and tap Get Full Quote</div>
     </div>
 
     <script>
@@ -58,22 +58,38 @@
             const h = parseFloat(document.getElementById('height').value) || 14;
             const roofType = document.getElementById('roofType').value;
             const pitch = parseFloat(document.getElementById('pitch').value);
+            const slabThick = parseFloat(document.getElementById('slabThick').value);
+            const footerDepth = parseFloat(document.getElementById('footerDepth').value) || 24;
 
             const sqft = Math.round(w * l);
             let basePrice = Math.round(sqft * 32);
 
-            if (roofType === 'asym') basePrice = Math.round(basePrice * 1.18);
-            if (roofType === 'single') basePrice = Math.round(basePrice * 0.95);
+            if (roofType === 'asym') basePrice *= 1.18;
+            if (roofType === 'single') basePrice *= 0.95;
+            basePrice = Math.round(basePrice * (1 + pitch / 24));
 
-            const pitchFactor = 1 + (pitch / 24);
-            basePrice = Math.round(basePrice * pitchFactor);
+            // Concrete
+            const slabArea = (w + 4) * (l + 4);           // extra for edges
+            const slabCost = Math.round(slabArea * (slabThick / 12) * 7.5);
+
+            const footerPerimeter = 2 * (w + l);
+            const footerWidth = 1.5; // ft
+            const footerCost = Math.round(footerPerimeter * footerWidth * (footerDepth / 12) * 8.5);
+
+            const totalConcrete = slabCost + footerCost;
+
+            const total = Math.round(basePrice + totalConcrete);
 
             document.getElementById('quoteDisplay').innerHTML = `
-                <strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} Roof</strong><br>
-                Pitch: ${pitch}:12<br><br>
+                <strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} Roof • ${pitch}:12 Pitch</strong><br><br>
                 Floor Area: ${sqft} sq ft<br>
-                <strong>Estimated Total: $${basePrice.toLocaleString()}</strong><br><br>
-                <small>Ballpark estimate. Doors, insulation, concrete available on request.</small>
+                Base Building: $${basePrice.toLocaleString()}<br><br>
+                <strong>Concrete (Two Pours):</strong><br>
+                • Slab (${slabThick}"): $${slabCost.toLocaleString()}<br>
+                • Footers (${footerDepth}" deep): $${footerCost.toLocaleString()}<br>
+                Total Concrete: $${totalConcrete.toLocaleString()}<br><br>
+                <strong style="color:#0066cc; font-size:1.4em;">Grand Total Estimate: $${total.toLocaleString()}</strong><br><br>
+                <small>Ballpark 2026 pricing • Doors, insulation, walkways, etc. available on request.</small>
             `;
         }
 
