@@ -12,9 +12,8 @@
         input, select, button { width:100%; padding:14px; margin:8px 0; border:1px solid #ccc; border-radius:8px; font-size:1.05em; }
         button { background:#0066cc; color:white; border:none; font-weight:bold; }
         .add-btn { background:#28a745; }
-        .remove-btn { background:#e74c3c; color:white; width:28px; height:28px; border-radius:50%; border:none; }
-        .door-row { background:#f9f9f9; padding:12px; border-radius:8px; margin:12px 0; position:relative; }
-        .quote { background:#e6f7e6; padding:20px; border-radius:10px; margin-top:20px; line-height:1.6; font-size:1.1em; }
+        .quote { background:#e6f7e6; padding:20px; border-radius:10px; margin-top:20px; line-height:1.6; }
+        .summary { font-size:1.1em; }
     </style>
 </head>
 <body>
@@ -31,12 +30,19 @@
             <option value="asym">Asymmetrical</option>
         </select>
 
-        <!-- Doors, Windows, etc. will be added in the next full version if needed, but this has the core + summary -->
+        <label>Number of Walk Doors</label>
+        <input type="number" id="walkDoors" value="1" min="0" max="6" onchange="updateAll()">
+
+        <label>Number of Windows</label>
+        <input type="number" id="windows" value="4" min="0" max="12" onchange="updateAll()">
+
+        <label><input type="checkbox" id="interiorFraming" checked onchange="updateAll()"> Interior Framing</label>
+        <label><input type="checkbox" id="interiorFinish" onchange="updateAll()"> Interior Finish Work (drywall, etc.)</label>
 
         <button onclick="getQuote()" style="margin:25px 0; padding:18px;">Get Full Quote</button>
         
         <div class="quote" id="quoteDisplay">
-            Enter dimensions and tap Get Full Quote for detailed breakdown
+            Enter details and tap Get Full Quote
         </div>
     </div>
 
@@ -46,6 +52,10 @@
             const l = parseFloat(document.getElementById('length').value) || 60;
             const h = parseFloat(document.getElementById('height').value) || 14;
             const roof = document.getElementById('roofType').value;
+            const walkDoors = parseInt(document.getElementById('walkDoors').value) || 0;
+            const windows = parseInt(document.getElementById('windows').value) || 0;
+            const framing = document.getElementById('interiorFraming').checked;
+            const finish = document.getElementById('interiorFinish').checked;
 
             const sqft = Math.round(w * l);
             let basePrice = Math.round(sqft * 32);
@@ -53,21 +63,40 @@
             if (roof === 'asym') basePrice = Math.round(basePrice * 1.18);
             if (roof === 'single') basePrice = Math.round(basePrice * 0.95);
 
-            const summary = `
-                <strong>${w}' × ${l}' × ${h}' ${roof.toUpperCase()} Roof Shed</strong><br><br>
-                Floor Area: ${sqft} sq ft<br>
-                Base Building: $${basePrice.toLocaleString()}<br><br>
-                <strong style="color:#0066cc; font-size:1.3em;">Estimated Total: $${(basePrice + 25000).toLocaleString()}</strong><br><br>
-                <small><strong>Summary of what’s included in this estimate:</strong><br>
-                • Steel building kit with chosen roof style<br>
-                • Basic insulation & doors allowance<br>
-                • Concrete slab recommendation<br>
-                • Delivery & basic site prep<br><br>
-                Add doors, windows, insulation upgrades, walkways, etc. for a more precise quote.</small>
-            `;
+            let total = basePrice;
+            let summary = `<strong>${w}' × ${l}' × ${h}' ${roof.toUpperCase()} Roof Shed</strong><br><br>`;
+
+            summary += `Floor Area: ${sqft} sq ft<br>`;
+            summary += `Base Building: $${basePrice.toLocaleString()}<br>`;
+
+            if (walkDoors > 0) {
+                const doorCost = walkDoors * 850;
+                total += doorCost;
+                summary += `${walkDoors} Walk Doors: $${doorCost.toLocaleString()}<br>`;
+            }
+            if (windows > 0) {
+                const winCost = windows * 450;
+                total += winCost;
+                summary += `${windows} Windows: $${winCost.toLocaleString()}<br>`;
+            }
+            if (framing) {
+                const framingCost = Math.round(sqft * 4.5);
+                total += framingCost;
+                summary += `Interior Framing: $${framingCost.toLocaleString()}<br>`;
+            }
+            if (finish) {
+                const finishCost = Math.round(sqft * 8);
+                total += finishCost;
+                summary += `Interior Finish Work: $${finishCost.toLocaleString()}<br>`;
+            }
+
+            summary += `<hr><strong style="color:#0066cc; font-size:1.4em;">Estimated Total: $${total.toLocaleString()}</strong><br><br>`;
+            summary += `<small><strong>Summary of Included Items:</strong><br>• Steel building kit with chosen roof<br>• Basic doors & windows allowance<br>• Framing & finish as selected<br>• Ballpark pricing for 2026</small>`;
 
             document.getElementById('quoteDisplay').innerHTML = summary;
         }
+
+        function updateAll() {}
     </script>
 </body>
 </html>
