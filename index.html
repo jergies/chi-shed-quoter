@@ -11,7 +11,6 @@
         label { display:block; margin:12px 0 6px; font-weight:bold; }
         input, select, button { width:100%; padding:14px; margin:8px 0; border:1px solid #ccc; border-radius:8px; font-size:1.05em; }
         button { background:#0066cc; color:white; border:none; font-weight:bold; }
-        .add-btn { background:#28a745; }
         .quote { background:#e6f7e6; padding:20px; border-radius:10px; margin-top:20px; line-height:1.6; }
     </style>
 </head>
@@ -71,23 +70,22 @@
 
             let total = basePrice;
 
-            // Doors
             const ohCost = ohDoors * 2800;
             const walkCost = walkDoors * 850;
             const winCost = windows * 450;
             total += ohCost + walkCost + winCost;
 
-            document.getElementById('quoteDisplay').innerHTML = `
-                <strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} • ${pitch}:12</strong><br><br>
-                Floor Area: ${sqft} sq ft<br>
-                Base Building: $${basePrice.toLocaleString()}<br><br>
-                ${ohDoors ? `Overhead Doors (${ohDoors}): $${ohCost.toLocaleString()}<br>` : ''}
-                ${walkDoors ? `Walk Doors (${walkDoors}): $${walkCost.toLocaleString()}<br>` : ''}
-                ${windows ? `Windows (${windows}): $${winCost.toLocaleString()}<br>` : ''}
-                <hr>
-                <strong style="color:#0066cc; font-size:1.4em;">Estimated Total: $${total.toLocaleString()}</strong><br><br>
-                <small>Ballpark 2026 pricing • Concrete, insulation, etc. available on request.</small>
-            `;
+            let summary = `<strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} • ${pitch}:12 Pitch</strong><br><br>`;
+            summary += `Floor Area: ${sqft} sq ft<br>`;
+            summary += `Base Building: $${basePrice.toLocaleString()}<br><br>`;
+
+            if (ohDoors > 0) summary += `Overhead Doors (${ohDoors}): $${ohCost.toLocaleString()}<br>`;
+            if (walkDoors > 0) summary += `Walk Doors (${walkDoors}): $${walkCost.toLocaleString()}<br>`;
+            if (windows > 0) summary += `Windows (${windows}): $${winCost.toLocaleString()}<br>`;
+
+            summary += `<hr><strong style="color:#0066cc; font-size:1.4em;">Grand Total Estimate: $${total.toLocaleString()}</strong>`;
+
+            document.getElementById('quoteDisplay').innerHTML = summary;
         }
 
         window.onload = calculate;
