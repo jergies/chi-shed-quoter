@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHI Shed Quoter</title>
+    <style>
+        body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; height:100vh; display:flex; flex-direction:column; }
+        .header { background:#0066cc; color:white; padding:20px; text-align:center; font-size:1.5em; font-weight:bold; }
+        .content { padding:20px; max-width:540px; margin:auto; background:white; box-shadow:0 0 15px rgba(0,0,0,0.1); overflow-y:auto; flex:1; }
+        label { display:block; margin:12px 0 6px; font-weight:bold; }
+        input, select, button { width:100%; padding:14px; margin:8px 0; border:1px solid #ccc; border-radius:8px; font-size:1.1em; }
+        button { background:#0066cc; color:white; border:none; font-weight:bold; }
+        .add-btn { background:#28a745; }
+        .quote { background:#e6f7e6; padding:20px; border-radius:10px; margin-top:20px; }
+    </style>
+</head>
+<body>
+    <div class="header">Nucor / CHI Steel Shed Quoter</div>
+    <div class="content">
+        <label>Width (ft)</label><input type="number" id="width" value="30">
+        <label>Length (ft)</label><input type="number" id="length" value="40">
+        <label>Wall Height (ft)</label><input type="number" id="height" value="12">
+
+        <button onclick="getQuote()" style="margin-top:20px;">Get Full Quote</button>
+        
+        <div class="quote" id="quoteDisplay">
+            Enter dimensions and tap Get Full Quote
+        </div>
+    </div>
+
+    <script>
+        function getQuote() {
+            const w = parseFloat(document.getElementById('width').value) || 30;
+            const l = parseFloat(document.getElementById('length').value) || 40;
+            const h = parseFloat(document.getElementById('height').value) || 12;
+            const sqft = Math.round(w * l);
+            const price = Math.round(sqft * 32);   // adjustable base rate
+
+            document.getElementById('quoteDisplay').innerHTML = `
+                <strong>${w}' × ${l}' × ${h}' Shed</strong><br><br>
+                ${sqft} sq ft<br>
+                <strong>Estimated Total: $${price.toLocaleString()}</strong><br><br>
+                <small>This is a ballpark figure. We can refine it with doors, insulation, concrete, etc.</small>
+            `;
+        }
+    </script>
+</body>
+</html>
