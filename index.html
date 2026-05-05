@@ -36,10 +36,10 @@
             <option value="5">5:12</option><option value="5.5">5.5:12</option><option value="6">6:12</option>
         </select>
 
-        <label>Number of Overhead Doors</label>
+        <label>Number of Premium Overhead Doors</label>
         <input type="number" id="ohDoors" value="2" min="0" max="4" onchange="calculate()">
 
-        <label>Number of Walk Doors</label>
+        <label>Number of Premium Walk Doors</label>
         <input type="number" id="walkDoors" value="1" min="0" max="6" onchange="calculate()">
 
         <label>Number of Windows</label>
@@ -54,6 +54,9 @@
 
         <label>Footer Depth (inches) — separate pour</label>
         <input type="number" id="footerDepth" value="24" onchange="calculate()">
+
+        <label>Distance to Concrete Plant (miles)</label>
+        <input type="number" id="concreteMiles" value="12" min="0" onchange="calculate()">
 
         <button onclick="calculate()" style="margin:25px 0; padding:18px;">Get Full Quote</button>
         
@@ -72,6 +75,7 @@
             const windows = parseInt(document.getElementById('windows').value) || 0;
             const slabThick = parseFloat(document.getElementById('slabThick').value);
             const footerDepth = parseFloat(document.getElementById('footerDepth').value) || 24;
+            const miles = parseFloat(document.getElementById('concreteMiles').value) || 0;
 
             const sqft = Math.round(w * l);
             let basePrice = Math.round(sqft * 32);
@@ -82,30 +86,33 @@
 
             let total = basePrice;
 
-            // Doors
-            total += ohDoors * 2800;
-            total += walkDoors * 850;
-            total += windows * 450;
+            // Premium Doors
+            total += ohDoors * 3400;     // Premium Overhead
+            total += walkDoors * 1250;   // Premium Walk Doors (increased)
+            total += windows * 480;
 
-            // Concrete - Two pours
+            // Concrete - Two pours + delivery
             const slabArea = (w + 4) * (l + 4);
-            const slabCost = Math.round(slabArea * (slabThick / 12) * 7.5);
+            const slabCost = Math.round(slabArea * (slabThick / 12) * 7.8);
 
             const footerPerimeter = 2 * (w + l);
-            const footerCost = Math.round(footerPerimeter * 1.5 * (footerDepth / 12) * 8.5);
+            const footerCost = Math.round(footerPerimeter * 1.5 * (footerDepth / 12) * 8.8);
 
-            total += slabCost + footerCost;
+            const deliveryCost = Math.round(miles * 6.5);
+
+            total += slabCost + footerCost + deliveryCost;
 
             let summary = `<strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} • ${pitch}:12</strong><br><br>`;
             summary += `Floor Area: ${sqft} sq ft<br>`;
-            summary += `Base Building: $${basePrice.toLocaleString()}<br>`;
-            if (ohDoors) summary += `Overhead Doors (${ohDoors}): $${(ohDoors*2800).toLocaleString()}<br>`;
-            if (walkDoors) summary += `Walk Doors (${walkDoors}): $${(walkDoors*850).toLocaleString()}<br>`;
-            if (windows) summary += `Windows (${windows}): $${(windows*450).toLocaleString()}<br>`;
-            summary += `<br><strong>Concrete (Two Pours):</strong><br>`;
+            summary += `Base Building: $${basePrice.toLocaleString()}<br><br>`;
+            if (ohDoors) summary += `Premium Overhead Doors (${ohDoors}): $${(ohDoors*3400).toLocaleString()}<br>`;
+            if (walkDoors) summary += `Premium Walk Doors (${walkDoors}): $${(walkDoors*1250).toLocaleString()}<br>`;
+            if (windows) summary += `Windows (${windows}): $${(windows*480).toLocaleString()}<br>`;
+            summary += `<br><strong>Concrete (Two Pours + Delivery):</strong><br>`;
             summary += `• Slab (${slabThick}"): $${slabCost.toLocaleString()}<br>`;
             summary += `• Footers (${footerDepth}" deep): $${footerCost.toLocaleString()}<br>`;
-            summary += `<hr><strong style="color:#0066cc; font-size:1.4em;">Grand Total: $${total.toLocaleString()}</strong>`;
+            if (miles > 0) summary += `• Delivery (${miles} miles): $${deliveryCost.toLocaleString()}<br>`;
+            summary += `<hr><strong style="color:#0066cc; font-size:1.4em;">Grand Total Estimate: $${total.toLocaleString()}</strong>`;
 
             document.getElementById('quoteDisplay').innerHTML = summary;
         }
