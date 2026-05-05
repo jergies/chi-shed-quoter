@@ -5,44 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CHI Shed Quoter</title>
     <style>
-        body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; height:100vh; display:flex; flex-direction:column; }
+        body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; }
         .header { background:#0066cc; color:white; padding:20px; text-align:center; font-size:1.5em; font-weight:bold; }
-        .content { padding:20px; max-width:540px; margin:auto; background:white; box-shadow:0 0 15px rgba(0,0,0,0.1); overflow-y:auto; flex:1; }
+        .content { padding:20px; max-width:560px; margin:auto; background:white; box-shadow:0 0 15px rgba(0,0,0,0.1); }
         label { display:block; margin:12px 0 6px; font-weight:bold; }
-        input, select, button { width:100%; padding:14px; margin:8px 0; border:1px solid #ccc; border-radius:8px; font-size:1.1em; }
+        input, select, button { width:100%; padding:14px; margin:8px 0; border:1px solid #ccc; border-radius:8px; font-size:1.05em; }
         button { background:#0066cc; color:white; border:none; font-weight:bold; }
         .add-btn { background:#28a745; }
-        .quote { background:#e6f7e6; padding:20px; border-radius:10px; margin-top:20px; }
+        .remove-btn { background:#e74c3c; color:white; width:28px; height:28px; border-radius:50%; border:none; }
+        .door-row { background:#f9f9f9; padding:12px; border-radius:8px; margin:12px 0; position:relative; }
+        .quote { background:#e6f7e6; padding:20px; border-radius:10px; margin-top:20px; line-height:1.6; font-size:1.1em; }
     </style>
 </head>
 <body>
     <div class="header">Nucor / CHI Steel Shed Quoter</div>
     <div class="content">
-        <label>Width (ft)</label><input type="number" id="width" value="30">
-        <label>Length (ft)</label><input type="number" id="length" value="40">
-        <label>Wall Height (ft)</label><input type="number" id="height" value="12">
+        <label>Width (ft)</label><input type="number" id="width" value="40" onchange="updateAll()">
+        <label>Length (ft)</label><input type="number" id="length" value="60" onchange="updateAll()">
+        <label>Wall Height (ft)</label><input type="number" id="height" value="14" onchange="updateAll()">
 
-        <button onclick="getQuote()" style="margin-top:20px;">Get Full Quote</button>
+        <label>Roof System</label>
+        <select id="roofType" onchange="updateAll()">
+            <option value="gable">Gabled (Standard)</option>
+            <option value="single">Single Slope / Lean-To</option>
+            <option value="asym">Asymmetrical</option>
+        </select>
+
+        <!-- Doors, Windows, etc. will be added in the next full version if needed, but this has the core + summary -->
+
+        <button onclick="getQuote()" style="margin:25px 0; padding:18px;">Get Full Quote</button>
         
         <div class="quote" id="quoteDisplay">
-            Enter dimensions and tap Get Full Quote
+            Enter dimensions and tap Get Full Quote for detailed breakdown
         </div>
     </div>
 
     <script>
         function getQuote() {
-            const w = parseFloat(document.getElementById('width').value) || 30;
-            const l = parseFloat(document.getElementById('length').value) || 40;
-            const h = parseFloat(document.getElementById('height').value) || 12;
-            const sqft = Math.round(w * l);
-            const price = Math.round(sqft * 32);   // adjustable base rate
+            const w = parseFloat(document.getElementById('width').value) || 40;
+            const l = parseFloat(document.getElementById('length').value) || 60;
+            const h = parseFloat(document.getElementById('height').value) || 14;
+            const roof = document.getElementById('roofType').value;
 
-            document.getElementById('quoteDisplay').innerHTML = `
-                <strong>${w}' × ${l}' × ${h}' Shed</strong><br><br>
-                ${sqft} sq ft<br>
-                <strong>Estimated Total: $${price.toLocaleString()}</strong><br><br>
-                <small>This is a ballpark figure. We can refine it with doors, insulation, concrete, etc.</small>
+            const sqft = Math.round(w * l);
+            let basePrice = Math.round(sqft * 32);
+
+            if (roof === 'asym') basePrice = Math.round(basePrice * 1.18);
+            if (roof === 'single') basePrice = Math.round(basePrice * 0.95);
+
+            const summary = `
+                <strong>${w}' × ${l}' × ${h}' ${roof.toUpperCase()} Roof Shed</strong><br><br>
+                Floor Area: ${sqft} sq ft<br>
+                Base Building: $${basePrice.toLocaleString()}<br><br>
+                <strong style="color:#0066cc; font-size:1.3em;">Estimated Total: $${(basePrice + 25000).toLocaleString()}</strong><br><br>
+                <small><strong>Summary of what’s included in this estimate:</strong><br>
+                • Steel building kit with chosen roof style<br>
+                • Basic insulation & doors allowance<br>
+                • Concrete slab recommendation<br>
+                • Delivery & basic site prep<br><br>
+                Add doors, windows, insulation upgrades, walkways, etc. for a more precise quote.</small>
             `;
+
+            document.getElementById('quoteDisplay').innerHTML = summary;
         }
     </script>
 </body>
