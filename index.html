@@ -13,7 +13,6 @@
         button { background:#0066cc; color:white; border:none; font-weight:bold; }
         .add-btn { background:#28a745; }
         .quote { background:#e6f7e6; padding:20px; border-radius:10px; margin-top:20px; line-height:1.6; }
-        .summary { font-size:1.1em; }
     </style>
 </head>
 <body>
@@ -26,18 +25,22 @@
         <label>Roof System</label>
         <select id="roofType" onchange="updateAll()">
             <option value="gable">Gabled (Standard)</option>
-            <option value="single">Single Slope / Lean-To</option>
+            <option value="single">Single Slope</option>
             <option value="asym">Asymmetrical</option>
         </select>
 
-        <label>Number of Walk Doors</label>
-        <input type="number" id="walkDoors" value="1" min="0" max="6" onchange="updateAll()">
+        <label>Slab Thickness</label>
+        <select id="slabThick" onchange="updateAll()">
+            <option value="4">4" Standard</option>
+            <option value="6" selected>6" Recommended</option>
+            <option value="8">8" Heavy Duty</option>
+        </select>
 
-        <label>Number of Windows</label>
-        <input type="number" id="windows" value="4" min="0" max="12" onchange="updateAll()">
+        <label>Walkway / Sidewalk Width (ft) — 0 to disable</label>
+        <input type="number" id="walkway" value="4" min="0" onchange="updateAll()">
 
-        <label><input type="checkbox" id="interiorFraming" checked onchange="updateAll()"> Interior Framing</label>
-        <label><input type="checkbox" id="interiorFinish" onchange="updateAll()"> Interior Finish Work (drywall, etc.)</label>
+        <label>Approach Length (ft) — 0 to disable</label>
+        <input type="number" id="approach" value="20" min="0" onchange="updateAll()">
 
         <button onclick="getQuote()" style="margin:25px 0; padding:18px;">Get Full Quote</button>
         
@@ -52,10 +55,9 @@
             const l = parseFloat(document.getElementById('length').value) || 60;
             const h = parseFloat(document.getElementById('height').value) || 14;
             const roof = document.getElementById('roofType').value;
-            const walkDoors = parseInt(document.getElementById('walkDoors').value) || 0;
-            const windows = parseInt(document.getElementById('windows').value) || 0;
-            const framing = document.getElementById('interiorFraming').checked;
-            const finish = document.getElementById('interiorFinish').checked;
+            const slabThick = parseFloat(document.getElementById('slabThick').value);
+            const walkwayW = parseFloat(document.getElementById('walkway').value) || 0;
+            const approachL = parseFloat(document.getElementById('approach').value) || 0;
 
             const sqft = Math.round(w * l);
             let basePrice = Math.round(sqft * 32);
@@ -69,29 +71,32 @@
             summary += `Floor Area: ${sqft} sq ft<br>`;
             summary += `Base Building: $${basePrice.toLocaleString()}<br>`;
 
-            if (walkDoors > 0) {
-                const doorCost = walkDoors * 850;
-                total += doorCost;
-                summary += `${walkDoors} Walk Doors: $${doorCost.toLocaleString()}<br>`;
-            }
-            if (windows > 0) {
-                const winCost = windows * 450;
-                total += winCost;
-                summary += `${windows} Windows: $${winCost.toLocaleString()}<br>`;
-            }
-            if (framing) {
-                const framingCost = Math.round(sqft * 4.5);
-                total += framingCost;
-                summary += `Interior Framing: $${framingCost.toLocaleString()}<br>`;
-            }
-            if (finish) {
-                const finishCost = Math.round(sqft * 8);
-                total += finishCost;
-                summary += `Interior Finish Work: $${finishCost.toLocaleString()}<br>`;
+            // Concrete
+            const slabArea = (w + 4) * (l + 4); // extra for overhang
+            const concreteCost = Math.round(slabArea * (slabThick / 12) * 7.5);
+            total += concreteCost;
+            summary += `Concrete Slab (${slabThick}" heavy spec): $${concreteCost.toLocaleString()}<br>`;
+
+            // Walkway
+            if (walkwayW > 0) {
+                const walkwayCost = Math.round(2*(w + l) * walkwayW * 6);
+                total += walkwayCost;
+                summary += `Walkway/Sidewalk (${walkwayW}' wide): $${walkwayCost.toLocaleString()}<br>`;
             }
 
-            summary += `<hr><strong style="color:#0066cc; font-size:1.4em;">Estimated Total: $${total.toLocaleString()}</strong><br><br>`;
-            summary += `<small><strong>Summary of Included Items:</strong><br>• Steel building kit with chosen roof<br>• Basic doors & windows allowance<br>• Framing & finish as selected<br>• Ballpark pricing for 2026</small>`;
+            // Approach
+            if (approachL > 0) {
+                const approachCost = Math.round(approachL * 12 * 6.5);
+                total += approachCost;
+                summary += `Approach (${approachL}' long): $${approachCost.toLocaleString()}<br>`;
+            }
+
+            summary += `<hr><strong style="color:#0066cc; font-size:1.4em;">Estimated Grand Total: $${total.toLocaleString()}</strong><br><br>`;
+            summary += `<small><strong>Summary of Included Items:</strong><br>
+            • Steel building kit + chosen roof<br>
+            • Heavy spec concrete slab<br>
+            • Walkways & approach as selected<br>
+            • Ballpark pricing for 2026</small>`;
 
             document.getElementById('quoteDisplay').innerHTML = summary;
         }
