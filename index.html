@@ -39,12 +39,18 @@
         <label>Slab Thickness (inches)</label>
         <select id="slabThick" onchange="calculate()">
             <option value="4">4"</option>
-            <option value="6" selected>6" (Recommended)</option>
+            <option value="6" selected>6" Recommended</option>
             <option value="8">8" Heavy</option>
         </select>
 
         <label>Footer Depth (inches) — separate pour</label>
         <input type="number" id="footerDepth" value="24" onchange="calculate()">
+
+        <label>Walkway Width (ft) — 0 = none</label>
+        <input type="number" id="walkway" value="4" min="0" onchange="calculate()">
+
+        <label>Approach Length (ft) — 0 = none</label>
+        <input type="number" id="approach" value="20" min="0" onchange="calculate()">
 
         <button onclick="calculate()" style="margin:25px 0; padding:18px;">Get Full Quote</button>
         
@@ -60,36 +66,49 @@
             const pitch = parseFloat(document.getElementById('pitch').value);
             const slabThick = parseFloat(document.getElementById('slabThick').value);
             const footerDepth = parseFloat(document.getElementById('footerDepth').value) || 24;
+            const walkwayW = parseFloat(document.getElementById('walkway').value) || 0;
+            const approachL = parseFloat(document.getElementById('approach').value) || 0;
 
             const sqft = Math.round(w * l);
             let basePrice = Math.round(sqft * 32);
 
-            if (roofType === 'asym') basePrice *= 1.18;
-            if (roofType === 'single') basePrice *= 0.95;
+            if (roofType === 'asym') basePrice = Math.round(basePrice * 1.18);
+            if (roofType === 'single') basePrice = Math.round(basePrice * 0.95);
             basePrice = Math.round(basePrice * (1 + pitch / 24));
 
-            // Concrete
-            const slabArea = (w + 4) * (l + 4);           // extra for edges
+            // Concrete - Two pours
+            const slabArea = (w + 4) * (l + 4);
             const slabCost = Math.round(slabArea * (slabThick / 12) * 7.5);
 
             const footerPerimeter = 2 * (w + l);
-            const footerWidth = 1.5; // ft
-            const footerCost = Math.round(footerPerimeter * footerWidth * (footerDepth / 12) * 8.5);
+            const footerCost = Math.round(footerPerimeter * 1.5 * (footerDepth / 12) * 8.5);
 
-            const totalConcrete = slabCost + footerCost;
+            let total = basePrice + slabCost + footerCost;
 
-            const total = Math.round(basePrice + totalConcrete);
+            // Walkway
+            if (walkwayW > 0) {
+                const walkwayCost = Math.round(2*(w+l) * walkwayW * 6);
+                total += walkwayCost;
+            }
+
+            // Approach
+            if (approachL > 0) {
+                const approachCost = Math.round(approachL * 12 * 6.5);
+                total += approachCost;
+            }
 
             document.getElementById('quoteDisplay').innerHTML = `
-                <strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} Roof • ${pitch}:12 Pitch</strong><br><br>
+                <strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} • ${pitch}:12 Pitch</strong><br><br>
                 Floor Area: ${sqft} sq ft<br>
                 Base Building: $${basePrice.toLocaleString()}<br><br>
-                <strong>Concrete (Two Pours):</strong><br>
+                <strong>Concrete (Two Separate Pours):</strong><br>
                 • Slab (${slabThick}"): $${slabCost.toLocaleString()}<br>
                 • Footers (${footerDepth}" deep): $${footerCost.toLocaleString()}<br>
-                Total Concrete: $${totalConcrete.toLocaleString()}<br><br>
+                ${walkwayW > 0 ? `• Walkway (${walkwayW}' wide): $${Math.round(2*(w+l)*walkwayW*6).toLocaleString()}<br>` : ''}
+                ${approachL > 0 ? `• Approach (${approachL}' long): $${Math.round(approachL*12*6.5).toLocaleString()}<br>` : ''}
+                <hr>
                 <strong style="color:#0066cc; font-size:1.4em;">Grand Total Estimate: $${total.toLocaleString()}</strong><br><br>
-                <small>Ballpark 2026 pricing • Doors, insulation, walkways, etc. available on request.</small>
+                <small>Realistic 2026 ballpark • Doors, insulation, windows available on request.</small>
             `;
         }
 
