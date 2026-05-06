@@ -54,6 +54,8 @@
         <label><input type="checkbox" id="insWalls" checked onchange="calculate()"> Insulate Walls</label>
         <label><input type="checkbox" id="insRoof" checked onchange="calculate()"> Insulate Roof</label>
 
+        <label><input type="checkbox" id="includeConcrete" checked onchange="calculate()"> Include Concrete (Slab + Footers + Delivery)</label>
+
         <label>Slab Thickness (inches)</label>
         <select id="slabThick" onchange="calculate()">
             <option value="4">4"</option>
@@ -61,12 +63,12 @@
             <option value="8">8" Heavy</option>
         </select>
 
-        <label>Footer Depth (inches)</label><input type="number" id="footerDepth" value="24" onchange="calculate()">
-        <label>Concrete Miles</label><input type="number" id="concreteMiles" value="12" onchange="calculate()">
+        <label>Footer Depth (inches) — separate pour</label><input type="number" id="footerDepth" value="24" onchange="calculate()">
+        <label>Distance to Concrete Plant (miles)</label><input type="number" id="concreteMiles" value="12" onchange="calculate()">
 
         <button onclick="calculate()" style="margin:25px 0; padding:18px; font-size:1.2em;">Get Full Quote</button>
         
-        <div class="quote" id="quoteDisplay">Adjust any value above</div>
+        <div class="quote" id="quoteDisplay">Adjust options and tap Get Full Quote</div>
     </div>
 
     <script>
@@ -82,7 +84,6 @@
         }
 
         function calculate() {
-            // Full calculation code here (same as before)
             const w = parseFloat(document.getElementById('width').value) || 40;
             const l = parseFloat(document.getElementById('length').value) || 60;
             const h = parseFloat(document.getElementById('height').value) || 14;
@@ -101,6 +102,7 @@
 
             const insWalls = document.getElementById('insWalls').checked;
             const insRoof = document.getElementById('insRoof').checked;
+            const includeConcrete = document.getElementById('includeConcrete').checked;
 
             const slabThick = parseFloat(document.getElementById('slabThick').value) || 6;
             const footerDepth = parseFloat(document.getElementById('footerDepth').value) || 24;
@@ -117,18 +119,44 @@
             if (insWalls) total += Math.round(sqft * 4.5);
             if (insRoof) total += Math.round(sqft * 5.8);
 
-            const slabCost = Math.round((w+4)*(l+4) * (slabThick/12) * concRate);
-            const footerCost = Math.round(2*(w+l) * 1.5 * (footerDepth/12) * 8.8);
-            const deliveryCost = Math.round(miles * 6.5);
+            let concreteSummary = "";
 
-            total += slabCost + footerCost + deliveryCost;
+            if (includeConcrete) {
+                const slabArea = (w + 4) * (l + 4);
+                const slabCost = Math.round(slabArea * (slabThick / 12) * concRate);
 
-            document.getElementById('quoteDisplay').innerHTML = `
-                <strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} • ${pitch}:12</strong><br><br>
-                Floor Area: ${sqft} sq ft<br>
-                Base Building: $${basePrice.toLocaleString()}<br><br>
-                <strong style="color:#0066cc; font-size:1.4em;">Grand Total: $${Math.round(total).toLocaleString()}</strong>
-            `;
+                const footerPerimeter = 2 * (w + l);
+                const footerCost = Math.round(footerPerimeter * 1.5 * (footerDepth / 12) * 8.8);
+
+                const deliveryCost = Math.round(miles * 6.5);
+
+                total += slabCost + footerCost + deliveryCost;
+
+                concreteSummary = `<br><strong>Concrete (Two Pours + Delivery):</strong><br>`;
+                concreteSummary += `• Slab (${slabThick}"): $${slabCost.toLocaleString()}<br>`;
+                concreteSummary += `• Footers (${footerDepth}" deep): $${footerCost.toLocaleString()}<br>`;
+                if (miles > 0) concreteSummary += `• Delivery (${miles} miles): $${deliveryCost.toLocaleString()}<br>`;
+            }
+
+            let summary = `<strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} • ${pitch}:12</strong><br><br>`;
+            summary += `Floor Area: ${sqft} sq ft<br>`;
+            summary += `Base Building: $${basePrice.toLocaleString()}<br><br>`;
+
+            if (ohDoors) summary += `Overhead Doors (${ohDoors}): $${(ohDoors*ohPrice).toLocaleString()}<br>`;
+            if (walkDoors) summary += `Walk Doors (${walkDoors}): $${(walkDoors*walkPrice).toLocaleString()}<br>`;
+            if (windows) summary += `Windows (${windows}): $${(windows*winPrice).toLocaleString()}<br>`;
+
+            if (insWalls || insRoof) {
+                summary += `<br><strong>Insulation:</strong><br>`;
+                if (insWalls) summary += `• Walls: $${Math.round(sqft*4.5).toLocaleString()}<br>`;
+                if (insRoof) summary += `• Roof: $${Math.round(sqft*5.8).toLocaleString()}<br>`;
+            }
+
+            summary += concreteSummary;
+
+            summary += `<hr><strong style="color:#0066cc; font-size:1.4em;">Grand Total Estimate: $${Math.round(total).toLocaleString()}</strong>`;
+
+            document.getElementById('quoteDisplay').innerHTML = summary;
         }
 
         window.onload = calculate;
