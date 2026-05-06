@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-</button>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CHI Shed Quoter</title>
@@ -88,8 +87,8 @@
             let total = basePrice;
 
             // Premium Doors
-            total += ohDoors * 3400;     // Premium Overhead
-            total += walkDoors * 1250;   // Premium Walk Doors (increased)
+            total += ohDoors * 3400;
+            total += walkDoors * 1250;
             total += windows * 480;
 
             // Concrete - Two pours + delivery
@@ -103,7 +102,7 @@
 
             total += slabCost + footerCost + deliveryCost;
 
-            let summary = `<strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} • ${pitch}:12</strong><br><br>`;
+            let summary = `<strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} • ${pitch}:12 Pitch</strong><br><br>`;
             summary += `Floor Area: ${sqft} sq ft<br>`;
             summary += `Base Building: $${basePrice.toLocaleString()}<br><br>`;
             if (ohDoors) summary += `Premium Overhead Doors (${ohDoors}): $${(ohDoors*3400).toLocaleString()}<br>`;
@@ -119,13 +118,6 @@
         }
 
         window.onload = calculate;
-        // Add this button somewhere visible (bottom or in a header)
-<button 
-  onClick={() => navigation.navigate('PriceSettings')}
-  style={{ padding: 10, backgroundColor: '#f0f0f0', margin: 10 }}
->
-  ⚙️ Price Settings
-</button>
     </script>
 </body>
 </html>
