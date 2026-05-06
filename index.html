@@ -61,8 +61,8 @@
             <option value="8">8" Heavy</option>
         </select>
 
-        <label>Footer Depth (inches) — separate pour</label><input type="number" id="footerDepth" value="24" onchange="calculate()">
-        <label>Distance to Concrete Plant (miles)</label><input type="number" id="concreteMiles" value="12" onchange="calculate()">
+        <label>Footer Depth (inches)</label><input type="number" id="footerDepth" value="24" onchange="calculate()">
+        <label>Concrete Miles</label><input type="number" id="concreteMiles" value="12" onchange="calculate()">
 
         <button onclick="calculate()" style="margin:25px 0; padding:18px; font-size:1.2em;">Get Full Quote</button>
         
@@ -70,7 +70,7 @@
     </div>
 
     <script>
-        const correctPassword = "chi2026";   // ← Change this password anytime
+        const correctPassword = "chi2026";
 
         function requestPassword() {
             const entered = prompt("Enter Password to access Price Settings:");
@@ -82,6 +82,7 @@
         }
 
         function calculate() {
+            // Full calculation code here (same as before)
             const w = parseFloat(document.getElementById('width').value) || 40;
             const l = parseFloat(document.getElementById('length').value) || 60;
             const h = parseFloat(document.getElementById('height').value) || 14;
@@ -126,7 +127,7 @@
                 <strong>${w}' × ${l}' × ${h}' ${roofType.toUpperCase()} • ${pitch}:12</strong><br><br>
                 Floor Area: ${sqft} sq ft<br>
                 Base Building: $${basePrice.toLocaleString()}<br><br>
-                <strong style="color:#0066cc; font-size:1.4em;">Grand Total Estimate: $${Math.round(total).toLocaleString()}</strong>
+                <strong style="color:#0066cc; font-size:1.4em;">Grand Total: $${Math.round(total).toLocaleString()}</strong>
             `;
         }
 
