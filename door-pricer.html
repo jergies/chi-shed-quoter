@@ -1,1 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHI Overhead Door Pricer</title>
+    <style>
+        body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; }
+        .header { background:#0066cc; color:white; padding:20px; text-align:center; font-size:1.5em; font-weight:bold; }
+        .content { padding:20px; max-width:560px; margin:auto; background:white; box-shadow:0 0 15px rgba(0,0,0,0.1); }
+        label { display:block; margin:12px 0 6px; font-weight:bold; }
+        input, select, button { width:100%; padding:14px; margin:8px 0; border:1px solid #ccc; border-radius:8px; font-size:1.05em; }
+        button { background:#0066cc; color:white; border:none; font-weight:bold; }
+        .settings-btn { background:#f39c12; color:white; padding:18px; margin:10px 0 20px 0; font-size:1.3em; font-weight:bold; border:none; border-radius:10px; width:100%; }
+        .quote { background:#e6f7e6; padding:20px; border-radius:10px; margin-top:20px; line-height:1.6; }
+    </style>
+</head>
+<body>
+    <div class="header">CHI Overhead Door Pricer</div>
+    <div class="content">
+        <button onclick="requestPassword()" class="settings-btn">⚙️ PRICE SETTINGS</button>
 
+        <div id="settings" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px;">
+            <label>Base Door Price</label><input type="number" id="basePrice" value="2400">
+            <label>Insulation Add-on (per inch)</label><input type="number" id="insPrice" value="450">
+            <label>Window each</label><input type="number" id="winPrice" value="280">
+        </div>
+
+        <label>Door Style</label>
+        <select id="style" onchange="calculate()">
+            <option value="smooth">Smooth</option>
+            <option value="textured" selected>Textured</option>
+            <option value="micro">Micro-Grooved</option>
+        </select>
+
+        <label>Insulation</label>
+        <select id="insulation" onchange="calculate()">
+            <option value="0">No Insulation</option>
+            <option value="1.5">1.5"</option>
+            <option value="2" selected>2"</option>
+            <option value="3">3"</option>
+        </select>
+
+        <label>Sandwich Panel</label>
+        <select id="sandwich" onchange="calculate()">
+            <option value="0">No</option>
+            <option value="1" selected>Yes - Steel</option>
+            <option value="1.2">Yes - Vinyl</option>
+        </select>
+
+        <label>Number of Windows</label><input type="number" id="windows" value="0" min="0" max="8" onchange="calculate()">
+
+        <label>Track Type</label>
+        <select id="track" onchange="calculate()">
+            <option value="1">Standard Overhead</option>
+            <option value="1.15">High Lift / Rake</option>
+            <option value="1.25">Vertical / Straight Up</option>
+        </select>
+
+        <label>Framing</label>
+        <select id="framing" onchange="calculate()">
+            <option value="1">Steel</option>
+            <option value="0.85">Wood</option>
+        </select>
+
+        <button onclick="calculate()" style="margin:25px 0; padding:18px; font-size:1.2em;">Calculate Door Price</button>
+        
+        <div class="quote" id="quoteDisplay">Select options above</div>
+    </div>
+
+    <script>
+        const correctPassword = "chi2026";
+
+        function requestPassword() {
+            const entered = prompt("Enter Password to access Price Settings:");
+            if (entered === correctPassword) {
+                document.getElementById('settings').style.display = 'block';
+            } else {
+                alert("Incorrect password.");
+            }
+        }
+
+        function calculate() {
+            const base = parseFloat(document.getElementById('basePrice').value) || 2400;
+            const insPerInch = parseFloat(document.getElementById('insPrice').value) || 450;
+            const winPrice = parseFloat(document.getElementById('winPrice').value) || 280;
+
+            const styleFactor = document.getElementById('style').value === 'micro' ? 1.1 : 1;
+            const insLevel = parseFloat(document.getElementById('insulation').value) || 0;
+            const sandwichFactor = parseFloat(document.getElementById('sandwich').value) || 0;
+            const windows = parseInt(document.getElementById('windows').value) || 0;
+            const trackFactor = parseFloat(document.getElementById('track').value) || 1;
+            const framingFactor = parseFloat(document.getElementById('framing').value) || 1;
+
+            let total = base * styleFactor * trackFactor * framingFactor;
+            total += insLevel * insPerInch * sandwichFactor;
+            total += windows * winPrice;
+
+            document.getElementById('quoteDisplay').innerHTML = `
+                <strong>Overhead Door Quote</strong><br><br>
+                Style: ${document.getElementById('style').options[document.getElementById('style').selectedIndex].text}<br>
+                Insulation: ${insLevel}" ${sandwichFactor > 0 ? 'Sandwich' : ''}<br>
+                Windows: ${windows}<br>
+                Track: ${document.getElementById('track').options[document.getElementById('track').selectedIndex].text}<br>
+                Framing: ${document.getElementById('framing').options[document.getElementById('framing').selectedIndex].text}<br><br>
+                <strong style="color:#0066cc; font-size:1.5em;">Total Price: $${Math.round(total).toLocaleString()}</strong>
+            `;
+        }
+
+        window.onload = calculate;
+    </script>
+</body>
+</html>
