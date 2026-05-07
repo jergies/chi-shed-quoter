@@ -1,158 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shed Quoting Tool</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { font-family: system-ui, sans-serif; }
-    input[type="number"] { -moz-appearance: textfield; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shed Quoting Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        input[type="number"] { -moz-appearance: textfield; }
+        .price-panel { transition: all 0.3s ease; }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
 
-  <!-- MAIN SCREEN -->
-  <div id="mainScreen">
-    <div class="bg-blue-600 text-white p-4 text-center text-xl font-bold">
-      Shed Quoting Tool
+    <!-- ==================== HEADER ==================== -->
+    <div class="bg-blue-600 text-white py-6 px-4 text-center">
+        <h1 class="text-3xl font-bold">Nucor / CHI Steel Shed Quoter</h1>
     </div>
 
-    <div class="p-4 space-y-6 max-w-lg mx-auto">
-
-      <div>
-        <label class="block text-sm font-medium mb-1">Shed Width (ft)</label>
-        <input type="number" id="width" value="12" class="w-full p-3 border rounded-lg text-lg" onchange="calculate()">
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium mb-1">Shed Length (ft)</label>
-        <input type="number" id="length" value="16" class="w-full p-3 border rounded-lg text-lg" onchange="calculate()">
-      </div>
-
-      <div class="flex items-center gap-3">
-        <input type="checkbox" id="insulation" checked onchange="calculate()">
-        <label class="font-medium">Include Insulation</label>
-      </div>
-
-      <div class="pt-4 border-t">
-        <button onclick="showPriceSettings()" 
-                class="w-full bg-gray-700 text-white py-3 rounded-lg font-medium">
-          ⚙️ Price Settings
+    <!-- ==================== PRICE SETTINGS ==================== -->
+    <div class="max-w-2xl mx-auto p-4">
+        <button onclick="togglePriceSettings()" 
+                class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-5 px-6 rounded-2xl flex items-center justify-center gap-3 text-xl shadow-lg">
+            <span class="text-3xl">⚙️</span> 
+            PRICE SETTINGS
         </button>
-      </div>
 
-      <div id="total" class="text-3xl font-bold text-center py-6 bg-white rounded-xl shadow">
-        Total: $0
-      </div>
-    </div>
-  </div>
+        <!-- PRICE SETTINGS PANEL -->
+        <div id="priceSettingsPanel" class="hidden mt-6 bg-white rounded-3xl shadow-2xl border border-gray-200 price-panel p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">🔧 Edit Price Settings</h2>
+                <button onclick="closePriceSettings()" 
+                        class="text-4xl text-gray-400 hover:text-red-500 leading-none">×</button>
+            </div>
 
-  <!-- PRICE SETTINGS SCREEN -->
-  <div id="priceSettings" class="hidden">
-    <div class="p-4 border-b flex items-center justify-between bg-white sticky top-0 shadow">
-      <h2 class="text-xl font-bold">Price Settings</h2>
-      <button onclick="goBackToMain()" 
-              class="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded font-medium">
-        ← Back
-      </button>
-    </div>
-    
-    <div class="p-6 space-y-8 max-w-lg mx-auto">
-      <!-- Material Prices -->
-      <div>
-        <h3 class="font-semibold text-lg mb-3">Material Prices (per sq ft)</h3>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm text-gray-600 mb-1">Siding</label>
-            <input type="number" id="priceSiding" step="0.01" value="4.50" 
-                   class="w-full p-3 border rounded-lg text-lg" onchange="savePriceSettings()">
-          </div>
-          <div>
-            <label class="block text-sm text-gray-600 mb-1">Roofing</label>
-            <input type="number" id="priceRoofing" step="0.01" value="3.25" 
-                   class="w-full p-3 border rounded-lg text-lg" onchange="savePriceSettings()">
-          </div>
+            <input type="password" id="chi2026" 
+                   placeholder="Enter password to unlock editing"
+                   class="w-full p-5 border border-gray-300 rounded-2xl text-lg focus:outline-none focus:border-orange-500 mb-6"
+                   onkeyup="if(event.key === 'Enter') checkPassword()">
+
+            <div id="priceFields" class="hidden space-y-8">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">Base Price per sq ft</label>
+                    <input type="number" id="basePrice" value="32" step="0.01"
+                           class="w-full p-5 border border-gray-300 rounded-2xl text-2xl font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">Premium Overhead Door</label>
+                    <input type="number" id="overheadDoor" value="3400" step="10"
+                           class="w-full p-5 border border-gray-300 rounded-2xl text-2xl font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">Premium Walk Door</label>
+                    <input type="number" id="walkDoor" value="1250" step="10"
+                           class="w-full p-5 border border-gray-300 rounded-2xl text-2xl font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">Window each</label>
+                    <input type="number" id="windowPrice" value="480" step="10"
+                           class="w-full p-5 border border-gray-300 rounded-2xl text-2xl font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">Concrete per cu ft</label>
+                    <input type="number" id="concretePrice" value="7.8" step="0.1"
+                           class="w-full p-5 border border-gray-300 rounded-2xl text-2xl font-medium">
+                </div>
+
+                <div class="flex gap-4 pt-6">
+                    <button onclick="saveAndClosePrices()" 
+                            class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-6 rounded-2xl text-xl">
+                        💾 Save & Close
+                    </button>
+                    <button onclick="closePriceSettings()" 
+                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-6 rounded-2xl text-xl">
+                        ❌ Close
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-
-      <!-- Labor Rates -->
-      <div>
-        <h3 class="font-semibold text-lg mb-3">Labor Rates (per sq ft)</h3>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm text-gray-600 mb-1">Siding Install</label>
-            <input type="number" id="laborSiding" step="0.01" value="2.75" 
-                   class="w-full p-3 border rounded-lg text-lg" onchange="savePriceSettings()">
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
 
-<script>
-// ====================== PRICE SETTINGS ======================
-function savePriceSettings() {
-  const settings = {
-    priceSiding: parseFloat(document.getElementById('priceSiding').value) || 4.50,
-    priceRoofing: parseFloat(document.getElementById('priceRoofing').value) || 3.25,
-    laborSiding: parseFloat(document.getElementById('laborSiding').value) || 2.75,
-  };
-  localStorage.setItem('shedPriceSettings', JSON.stringify(settings));
-}
+    <!-- ==================== MAIN FORM (placeholder) ==================== -->
+    <div class="max-w-2xl mx-auto p-4 space-y-8">
+        <div class="bg-white p-6 rounded-3xl shadow">
+            <label class="block text-sm font-semibold mb-2">Width (ft)</label>
+            <input type="number" id="width" value="20" class="w-full p-5 border rounded-2xl text-2xl">
+        </div>
+        <button onclick="calculateQuote()" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-3xl text-2xl">
+            Calculate Quote
+        </button>
+    </div>
 
-function loadPriceSettings() {
-  const saved = localStorage.getItem('shedPriceSettings');
-  if (saved) {
-    const s = JSON.parse(saved);
-    document.getElementById('priceSiding').value = s.priceSiding || 4.50;
-    document.getElementById('priceRoofing').value = s.priceRoofing || 3.25;
-    document.getElementById('laborSiding').value = s.laborSiding || 2.75;
-  }
-}
+    <script>
+        // ==================== CHANGE YOUR PASSWORD HERE ====================
+        const CORRECT_PASSWORD = "my settings";   // ←←← CHANGE THIS LINE TO WHATEVER YOU WANT
 
-// ====================== NAVIGATION ======================
-function showPriceSettings() {
-  document.getElementById('mainScreen').classList.add('hidden');
-  document.getElementById('priceSettings').classList.remove('hidden');
-}
+        // ==================== PRICE SETTINGS LOGIC ====================
+        function togglePriceSettings() {
+            const panel = document.getElementById('priceSettingsPanel');
+            panel.classList.toggle('hidden');
+            
+            document.getElementById('pricePassword').value = '';
+            document.getElementById('priceFields').classList.add('hidden');
+        }
 
-function goBackToMain() {
-  document.getElementById('priceSettings').classList.add('hidden');
-  document.getElementById('mainScreen').classList.remove('hidden');
-  calculate();
-}
+        function checkPassword() {
+            const entered = document.getElementById('pricePassword').value.trim();
+            
+            if (entered === CORRECT_PASSWORD) {
+                document.getElementById('priceFields').classList.remove('hidden');
+                loadSavedPrices();
+            } else {
+                alert("❌ Wrong password");
+            }
+        }
 
-// ====================== CALCULATION ======================
-function calculate() {
-  const width = parseFloat(document.getElementById('width').value) || 0;
-  const length = parseFloat(document.getElementById('length').value) || 0;
-  const area = width * length;
-  
-  const includeInsulation = document.getElementById('insulation').checked;
+        function loadSavedPrices() {
+            if (localStorage.getItem('basePrice')) {
+                document.getElementById('basePrice').value = localStorage.getItem('basePrice');
+                document.getElementById('overheadDoor').value = localStorage.getItem('overheadDoor');
+                document.getElementById('walkDoor').value = localStorage.getItem('walkDoor');
+                document.getElementById('windowPrice').value = localStorage.getItem('windowPrice');
+                document.getElementById('concretePrice').value = localStorage.getItem('concretePrice');
+            }
+        }
 
-  const priceSiding = parseFloat(document.getElementById('priceSiding').value) || 4.50;
-  const priceRoofing = parseFloat(document.getElementById('priceRoofing').value) || 3.25;
-  const laborSiding = parseFloat(document.getElementById('laborSiding').value) || 2.75;
+        function saveAndClosePrices() {
+            localStorage.setItem('basePrice', document.getElementById('basePrice').value);
+            localStorage.setItem('overheadDoor', document.getElementById('overheadDoor').value);
+            localStorage.setItem('walkDoor', document.getElementById('walkDoor').value);
+            localStorage.setItem('windowPrice', document.getElementById('windowPrice').value);
+            localStorage.setItem('concretePrice', document.getElementById('concretePrice').value);
+            
+            alert("✅ Prices saved! You can now close the app.");
+            closePriceSettings();
+        }
 
-  let total = 0;
-  total += area * priceSiding;
-  total += area * priceRoofing;
-  total += area * laborSiding;
+        function closePriceSettings() {
+            document.getElementById('priceSettingsPanel').classList.add('hidden');
+        }
 
-  if (includeInsulation) {
-    total += area * 2.50;   // Default insulation price
-  }
+        function calculateQuote() {
+            const base = parseFloat(localStorage.getItem('basePrice') || 32);
+            document.getElementById('results').innerHTML = `
+                <div class="bg-white p-8 rounded-3xl shadow text-center max-w-2xl mx-auto mt-6">
+                    <h2 class="text-3xl font-bold text-green-600">Quote Ready</h2>
+                    <p class="text-5xl font-bold my-6">$${(base * 400).toFixed(2)}</p>
+                    <p class="text-gray-600">Using your saved prices</p>
+                </div>
+            `;
+            document.getElementById('results').classList.remove('hidden');
+        }
 
-  document.getElementById('total').textContent = `Total: $${total.toFixed(0)}`;
-}
-
-// Load everything
-window.addEventListener('load', () => {
-  loadPriceSettings();
-  calculate();
-});
-</script>
-
+        // Load prices when page opens
+        window.onload = () => {
+            // Make sure results div exists
+            if (!document.getElementById('results')) {
+                const resultsDiv = document.createElement('div');
+                resultsDiv.id = 'results';
+                document.body.appendChild(resultsDiv);
+            }
+            loadSavedPrices();
+        };
+    </script>
 </body>
 </html>
