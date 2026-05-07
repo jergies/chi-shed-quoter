@@ -1,94 +1,43 @@
-// PriceSettings.js
-import React, { useState } from 'react';
-
-const ADMIN_PASSWORD = "11900";   // ← You can change this later
-
-function PriceSettings() {
-  const [password, setPassword] = useState("");
-  const [isUnlocked, setIsUnlocked] = useState(false);
-
-  const [prices, setPrices] = useState({
-    steelPerSqFt: 11.85,
-    laborPerSqFt: 4.25,
-    door8x7: 1850,
-    door10x10: 2450,
-    deliveryFee: 375,
-  });
-
-  const handleUnlock = () => {
-    if (password === ADMIN_PASSWORD) {
-      setIsUnlocked(true);
-      setPassword("");
-    } else {
-      alert("Incorrect password");
-      setPassword("");
-    }
-  };
-
-  const updatePrice = (key, value) => {
-    setPrices(prev => ({ ...prev, [key]: parseFloat(value) || 0 }));
-  };
-
-  const savePrices = () => {
-    localStorage.setItem('buildingPrices', JSON.stringify(prices));
-    alert("✅ Prices saved successfully!");
-  };
-
-  // Password Screen
-  if (!isUnlocked) {
-    return (
-      <div style={{ padding: 40, textAlign: "center" }}>
-        <h2>Price Settings</h2>
-        <p>Enter Password</p>
-        <input 
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ padding: 12, fontSize: 18, width: "200px" }}
-        />
-        <br /><br />
-        <button onClick={handleUnlock} style={{ padding: 12, fontSize: 16 }}>
-          Unlock
-        </button>
+<!-- Price Settings Screen -->
+<div id="priceSettings" class="hidden">
+  <div class="p-4 border-b flex items-center justify-between bg-white sticky top-0">
+    <h2 class="text-xl font-bold">Price Settings</h2>
+    <button onclick="goBackToMain()" 
+            class="px-5 py-2 bg-gray-300 hover:bg-gray-400 rounded font-medium">
+      ← Back
+    </button>
+  </div>
+  
+  <div class="p-6 space-y-8">
+    <!-- Material Prices -->
+    <div>
+      <h3 class="font-semibold text-lg mb-3">Material Prices (per sq ft)</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Siding</label>
+          <input type="number" id="priceSiding" step="0.01" value="4.50"
+                 class="w-full p-3 border rounded-lg text-lg" onchange="savePriceSettings()">
+        </div>
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Roofing</label>
+          <input type="number" id="priceRoofing" step="0.01" value="3.25"
+                 class="w-full p-3 border rounded-lg text-lg" onchange="savePriceSettings()">
+        </div>
+        <!-- Add more material fields here as needed -->
       </div>
-    );
-  }
-
-  // Unlocked Price Screen
-  return (
-    <div style={{ padding: 20 }}>
-      <h2>Price Settings</h2>
-      
-      <div style={{ margin: "15px 0" }}>
-        <label>Steel per sq ft: </label>
-        <input type="number" value={prices.steelPerSqFt} onChange={(e) => updatePrice('steelPerSqFt', e.target.value)} />
-      </div>
-
-      <div style={{ margin: "15px 0" }}>
-        <label>Labor per sq ft: </label>
-        <input type="number" value={prices.laborPerSqFt} onChange={(e) => updatePrice('laborPerSqFt', e.target.value)} />
-      </div>
-
-      <div style={{ margin: "15px 0" }}>
-        <label>8x7 Door: </label>
-        <input type="number" value={prices.door8x7} onChange={(e) => updatePrice('door8x7', e.target.value)} />
-      </div>
-
-      <div style={{ margin: "15px 0" }}>
-        <label>10x10 Door: </label>
-        <input type="number" value={prices.door10x10} onChange={(e) => updatePrice('door10x10', e.target.value)} />
-      </div>
-
-      <div style={{ margin: "15px 0" }}>
-        <label>Delivery Fee: </label>
-        <input type="number" value={prices.deliveryFee} onChange={(e) => updatePrice('deliveryFee', e.target.value)} />
-      </div>
-
-      <br /><br />
-      <button onClick={savePrices} style={{ padding: 12, marginRight: 10 }}>Save Changes</button>
-      <button onClick={() => setIsUnlocked(false)}>Lock</button>
     </div>
-  );
-}
 
-export default PriceSettings;
+    <!-- Labor Rates -->
+    <div>
+      <h3 class="font-semibold text-lg mb-3">Labor Rates (per sq ft)</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Siding Install</label>
+          <input type="number" id="laborSiding" step="0.01" value="2.75"
+                 class="w-full p-3 border rounded-lg text-lg" onchange="savePriceSettings()">
+        </div>
+        <!-- Add more labor fields here as needed -->
+      </div>
+    </div>
+  </div>
+</div>
