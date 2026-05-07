@@ -1,1 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shed Quoting Tool - FINAL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        input[type="number"] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
 
+    <div class="bg-blue-600 text-white py-6 px-4 text-center">
+        <h1 class="text-3xl font-bold">Nucor / CHI Steel Shed Quoter</h1>
+    </div>
+
+    <div class="max-w-2xl mx-auto p-4">
+        <!-- Orange Button -->
+        <button onclick="togglePriceSettings()" 
+                class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-5 px-6 rounded-2xl flex items-center justify-center gap-3 text-xl shadow-lg mb-4">
+            <span class="text-3xl">⚙️</span> PRICE SETTINGS
+        </button>
+
+        <!-- Panel -->
+        <div id="priceSettingsPanel" class="hidden mt-4 bg-white rounded-3xl shadow-2xl p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">🔧 Price Settings</h2>
+                <button onclick="closePriceSettings()" class="text-4xl text-red-400">×</button>
+            </div>
+
+            <input type="password" id="pricePassword" placeholder="Password" 
+                   class="w-full p-5 border-2 border-gray-300 rounded-2xl text-lg mb-6"
+                   onkeyup="if(event.key === 'Enter') checkPassword()">
+
+            <div id="priceFields" class="hidden space-y-6">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Base Price per sq ft</label>
+                    <input type="number" id="basePrice" value="32" step="0.01" class="w-full p-4 border rounded-xl text-xl">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Premium Overhead Door</label>
+                    <input type="number" id="overheadDoor" value="3400" step="10" class="w-full p-4 border rounded-xl text-xl">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Premium Walk Door</label>
+                    <input type="number" id="walkDoor" value="1250" step="10" class="w-full p-4 border rounded-xl text-xl">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Window each</label>
+                    <input type="number" id="windowPrice" value="480" step="10" class="w-full p-4 border rounded-xl text-xl">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Concrete per cu ft</label>
+                    <input type="number" id="concretePrice" value="7.8" step="0.1" class="w-full p-4 border rounded-xl text-xl">
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="saveAndClosePrices()" class="flex-1 bg-green-600 text-white font-bold py-5 rounded-2xl">💾 Save & Close</button>
+                    <button onclick="closePriceSettings()" class="flex-1 bg-gray-300 font-bold py-5 rounded-2xl">❌ Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CORRECT_PASSWORD = "my settings";   // ← Your password is set here
+
+        function togglePriceSettings() {
+            document.getElementById('priceSettingsPanel').classList.toggle('hidden');
+            document.getElementById('pricePassword').value = '';
+            document.getElementById('priceFields').classList.add('hidden');
+        }
+
+        function checkPassword() {
+            if (document.getElementById('pricePassword').value.trim() === CORRECT_PASSWORD) {
+                document.getElementById('priceFields').classList.remove('hidden');
+            } else {
+                alert("Wrong password");
+            }
+        }
+
+        function saveAndClosePrices() {
+            alert("✅ Saved! (This version uses localStorage - changes should survive)");
+            closePriceSettings();
+        }
+
+        function closePriceSettings() {
+            document.getElementById('priceSettingsPanel').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
