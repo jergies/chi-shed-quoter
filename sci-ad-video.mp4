@@ -1,1 +1,13 @@
 
+<!-- SCI Advertisement Video - Autoplay -->
+<div style="position: relative; width: 100%; max-width: 900px; margin: 20px auto; overflow: hidden; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+  <video 
+      autoplay 
+      muted 
+      loop 
+      playsinline 
+      style="width: 100%; height: auto; display: block;">
+      <source src="sci-ad-video.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+  </video>
+</div>
