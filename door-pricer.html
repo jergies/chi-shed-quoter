@@ -31,6 +31,8 @@
             <input type="number" id="markupPct" value="30" step="1">
             <label>Labor $ per sq ft (Corny uses 5)</label>
             <input type="number" id="laborPerSqft" value="5" step="0.25">
+            <label>LiftMaster electric operator (each)</label>
+            <input type="number" id="electricPrice" value="850">
             <label>Window each</label>
             <input type="number" id="winPrice" value="280">
             <label>Insulation add-on $ per inch per sq ft</label>
@@ -61,6 +63,12 @@
             <option value="14x12">14' × 12'</option>
             <option value="14x14">14' × 14'</option>
             <option value="16x14">16' × 14'</option>
+        </select>
+
+        <label>Operator</label>
+        <select id="operator" onchange="calculate()">
+            <option value="chain" selected>Chain hoist (included with CHI)</option>
+            <option value="electric">Electric — LiftMaster (add-on)</option>
         </select>
 
         <label>Door Style</label>
@@ -138,9 +146,11 @@
             const chiPerSqft = parseFloat(document.getElementById('chiPerSqft').value) || 18;
             const markupPct = parseFloat(document.getElementById('markupPct').value) || 30;
             const laborPerSqft = parseFloat(document.getElementById('laborPerSqft').value) || 5;
+            const electricPrice = parseFloat(document.getElementById('electricPrice').value) || 850;
             const winPrice = parseFloat(document.getElementById('winPrice').value) || 280;
             const insPrice = parseFloat(document.getElementById('insPrice').value) || 1.5;
 
+            const operator = document.getElementById('operator').value;
             const styleFactor = document.getElementById('style').value === 'micro' ? 1.1 : 1;
             const insLevel = parseFloat(document.getElementById('insulation').value) || 0;
             const sandwichFactor = parseFloat(document.getElementById('sandwich').value) || 0;
@@ -148,7 +158,6 @@
             const trackFactor = parseFloat(document.getElementById('track').value) || 1;
             const framingFactor = parseFloat(document.getElementById('framing').value) || 1;
 
-            // CHI door cost (size + options)
             let chiDoor = sqft * chiPerSqft * styleFactor;
             chiDoor += sqft * insLevel * insPrice * sandwichFactor;
             chiDoor += windows * winPrice;
@@ -156,13 +165,19 @@
 
             const markup = chiDoor * (markupPct / 100);
             const labor = sqft * laborPerSqft;
-            const total = chiDoor + markup + labor;
+            const operatorCost = (operator === 'electric') ? electricPrice : 0;
+            const total = chiDoor + markup + labor + operatorCost;
+
+            const opLabel = operator === 'electric'
+                ? 'Electric LiftMaster: $' + Math.round(operatorCost).toLocaleString()
+                : 'Chain hoist: included in CHI';
 
             document.getElementById('quoteDisplay').innerHTML = `
                 <strong>${w}' × ${h}' Overhead Door</strong> • ${sqft} sq ft<br><br>
                 CHI door (with options): $${Math.round(chiDoor).toLocaleString()}<br>
                 Markup ${markupPct}%: $${Math.round(markup).toLocaleString()}<br>
                 Install labor ($${laborPerSqft}/sq ft): $${Math.round(labor).toLocaleString()}<br>
+                ${opLabel}<br>
                 <hr>
                 <strong style="color:#0066cc; font-size:1.5em;">Sell Price: $${Math.round(total).toLocaleString()}</strong>
             `;
